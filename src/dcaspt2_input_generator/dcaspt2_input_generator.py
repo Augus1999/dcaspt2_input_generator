@@ -26,7 +26,7 @@ class MainApp:
 
     def run(self):
         try:
-            sys.exit(self.app.exec())
+            sys.exit(self.app.exec_())
         except SystemExit:
             self.delete_unneeded_files()
 

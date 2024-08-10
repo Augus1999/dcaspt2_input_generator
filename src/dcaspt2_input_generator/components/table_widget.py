@@ -236,7 +236,7 @@ len(1st header)={len(row)}"
         not_used_action.triggered.connect(lambda: self.change_background_color(colors.not_used.color))
         menu.addAction(not_used_action)
 
-        menu.exec(self.viewport().mapToGlobal(position))
+        menu.exec_(self.viewport().mapToGlobal(position))
 
     def change_selected_rows_background_color(self, row, color: QColor):
         for column in range(self.columnCount()):
