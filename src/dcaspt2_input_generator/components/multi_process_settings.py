@@ -14,10 +14,12 @@ class MultiProcessSettingDialog(QDialog):
         self.init_UI()
 
     def init_UI(self):
+        cpu_count = os.cpu_count()
+        cpu_count = 10 if cpu_count is None else cpu_count
         self.setWindowTitle("Set Process Number for sum_dirac_dfcoef calculation")
         self.resize(400, 50)
         self.multi_process_spin_box = QSpinBox()
-        self.multi_process_spin_box.setRange(1, os.cpu_count())
+        self.multi_process_spin_box.setRange(1, cpu_count)
         self.multi_process_spin_box.setValue(settings.multi_process_input.multi_process_num)
         self.multi_process_spin_box.valueChanged.connect(self.onMultiProcessDialogChanged)
 

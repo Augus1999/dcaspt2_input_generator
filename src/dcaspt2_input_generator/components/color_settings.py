@@ -24,8 +24,8 @@ class ColorSettingsDialog(QDialog):
 
         # Add the radio buttons to the layout
         layout = QVBoxLayout()
-        for button in self.buttonGroup.buttons():
-            layout.addWidget(button)
+        for btn in self.buttonGroup.buttons():
+            layout.addWidget(btn)
 
         # Create a widget to hold the layout
         widget = QWidget()

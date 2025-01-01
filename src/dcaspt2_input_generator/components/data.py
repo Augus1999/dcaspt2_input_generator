@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from dataclasses import dataclass, field
 from typing import Dict, List, Union
 from typing import OrderedDict as ODict
@@ -62,17 +63,11 @@ class SpinorNumInfo(Dict[str, SpinorNumber]):
 
 @dataclass
 class HeaderInfo:
-    spinor_num_info: SpinorNumInfo = None
-    moltra_info: MoltraInfo = None
+    spinor_num_info: SpinorNumInfo = field(default_factory=SpinorNumInfo)
+    moltra_info: MoltraInfo = field(default_factory=MoltraInfo)
     point_group: str = ""
     moltra_scheme: Union[int, None] = None
     electron_number: int = 0
-
-    def __post_init__(self):
-        if self.spinor_num_info is None:
-            self.spinor_num_info = SpinorNumInfo({})
-        if self.moltra_info is None:
-            self.moltra_info = MoltraInfo({})
 
     def read_spinor_num_info(self, row: List[str]) -> None:
         # spinor_num info is following the format:
@@ -102,13 +97,13 @@ is the correct format"
         while idx + 2 <= len(row):
             moltra_type = row[idx]
             moltra_range_str = row[idx + 1]
-            moltra_range = {}
+            moltra_range: ODict[int, bool] = OrderedDict()
             for elem in moltra_range_str.split(","):
                 moltra_range_elem = elem.strip()
                 if ".." in moltra_range_elem:
-                    moltra_range_start, moltra_range_end = moltra_range_elem.split("..")
-                    moltra_range_start = int(moltra_range_start)
-                    moltra_range_end = int(moltra_range_end)
+                    moltra_range_start_str, moltra_range_end_str = moltra_range_elem.split("..")
+                    moltra_range_start = int(moltra_range_start_str)
+                    moltra_range_end = int(moltra_range_end_str)
                     for i in range(moltra_range_start, moltra_range_end + 1):
                         moltra_range[i] = True
                 else:
@@ -117,7 +112,7 @@ is the correct format"
             self.moltra_info[moltra_type] = moltra_range
             idx += 2
         for key in self.moltra_info.keys():
-            self.moltra_info[key] = dict(sorted(self.moltra_info[key].items()))
+            self.moltra_info[key] = OrderedDict(sorted(self.moltra_info[key].items()))
 
     def update_electron_number(self, number: int) -> None:
         self.electron_number = number
@@ -210,7 +205,7 @@ class TableData:
     def reset(self):
         self.mo_data = []
         self.column_max_len = 0
-        self.header_info = HeaderInfo({})
+        self.header_info = HeaderInfo()
         self.idx_info = TableIdxInfo()
 
     def add_mo_data(self, row: List[str]) -> None:

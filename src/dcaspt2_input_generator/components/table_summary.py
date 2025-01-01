@@ -1,13 +1,15 @@
-from dcaspt2_input_generator.utils.settings import settings
-from dcaspt2_input_generator.utils.utils import debug_print
-from PySide6.QtCore import Signal
+from PySide6.QtCore import Signal, SignalInstance
 from PySide6.QtGui import QFocusEvent, QIntValidator
 from PySide6.QtWidgets import QFrame, QGridLayout, QLabel, QLineEdit, QWidget
 
+from dcaspt2_input_generator.utils.settings import settings
+from dcaspt2_input_generator.utils.utils import debug_print
+
 
 class NaturalNumberInput(QLineEdit):
+    bottom_num: int
     default_num: int
-    validator: QIntValidator
+    int_validator: QIntValidator
 
     def __init__(self, bottom_num: int = 0, default_num: int = 0):
         super().__init__()
@@ -20,29 +22,27 @@ class NaturalNumberInput(QLineEdit):
         self.setMaximumWidth(200)
 
     def __setup_validator__(self, bottom_num: int):
-        self.validator = QIntValidator()
-        self.validator.setBottom(bottom_num)
-        self.setValidator(self.validator)
+        self.int_validator = QIntValidator()
+        self.int_validator.setBottom(bottom_num)
+        self.setValidator(self.int_validator)
 
     def set_top(self, top_num: int):
-        self.validator.setTop(top_num)
+        self.int_validator.setTop(top_num)
+        self.setValidator(self.int_validator)
         if not self.is_input_valid():
             self.update_text()
 
     def is_input_valid(self):
-        if self.hasAcceptableInput():
-            return True
-        else:
-            return False
+        return self.hasAcceptableInput()
 
     def update_text(self):
         current_val = self.get_value()
-        if int(current_val) > self.validator.top():
-            self.setText(str(self.validator.top()))
-        elif int(current_val) < self.validator.bottom():
-            self.setText(str(self.validator.bottom()))
-        elif self.default_num > self.validator.top():
-            self.setText(str(self.validator.top()))
+        if int(current_val) > self.int_validator.top():
+            self.setText(str(self.int_validator.top()))
+        elif int(current_val) < self.int_validator.bottom():
+            self.setText(str(self.int_validator.bottom()))
+        elif self.default_num > self.int_validator.top():
+            self.setText(str(self.int_validator.top()))
         else:
             self.setText(str(self.default_num))
 
@@ -61,7 +61,7 @@ class NaturalNumberInput(QLineEdit):
 
 
 class TotsymNumberInput(NaturalNumberInput):
-    def __init__(self, changed: Signal, default_num: int, bottom_num: int = 1):
+    def __init__(self, changed: SignalInstance, default_num: int, bottom_num: int = 1):
         super().__init__(bottom_num, default_num)
         self.changed = changed
 
@@ -76,10 +76,8 @@ class UserInput(QGridLayout):
     def __init__(self):
         super().__init__()
         # 数値を入力するためのラベル
-        self.totsym_label = QLabel("totsym")
+        self.totsym_label = QLabel("total symmetry number")
         self.totsym_number = TotsymNumberInput(self.changed, default_num=settings.input.totsym)
-        self.selectroot_label = QLabel("selectroot")
-        self.selectroot_number = NaturalNumberInput(bottom_num=1, default_num=settings.input.selectroot)
         self.diracver_label = QLabel("DIRAC major version (if 21.1, type 21)")
         self.dirac_ver_number = NaturalNumberInput(bottom_num=12, default_num=settings.input.dirac_ver)
         self.ras1_max_hole_label = QLabel("ras1 max hole")
@@ -89,10 +87,8 @@ class UserInput(QGridLayout):
 
         self.addWidget(self.totsym_label, 0, 0)
         self.addWidget(self.totsym_number, 0, 1)
-        self.addWidget(self.selectroot_label, 0, 2)
-        self.addWidget(self.selectroot_number, 0, 3)
-        self.addWidget(self.diracver_label, 0, 4)
-        self.addWidget(self.dirac_ver_number, 0, 5)
+        self.addWidget(self.diracver_label, 0, 2)
+        self.addWidget(self.dirac_ver_number, 0, 3)
         self.addWidget(self.ras1_max_hole_label, 1, 0)
         self.addWidget(self.ras1_max_hole_number, 1, 1)
         self.addWidget(self.ras3_max_electron_label, 1, 2)
@@ -101,7 +97,6 @@ class UserInput(QGridLayout):
     def get_input_values(self):
         return {
             "totsym": self.totsym_number.get_value(),
-            "selectroot": self.selectroot_number.get_value(),
             "ras1_max_hole": self.ras1_max_hole_number.get_value(),
             "ras3_max_electron": self.ras3_max_electron_number.get_value(),
             "dirac_ver": self.dirac_ver_number.get_value(),

@@ -57,21 +57,22 @@ class WidgetController:
             rem_electrons -= 2
 
         # Create standard IVO input
-        output = "ninact\n0\n"
-        output += f"nact\n{act}\n"
-        output += f"nsec\n{sec}\n"
-        output += f"nelec\n{act}\n"
+        output = ".ninact\n0\n"
+        output += f".nact\n{act}\n"
+        output += f".nsec\n{sec}\n"
+        output += f".nelec\n{act}\n"
         if is_gerade_ungerade:
-            output += f"noccg\n{nocc['E1g']}\nnoccu\n{nocc['E1u']}\n"
-            output += "" if sum(nvcut.values()) == 0 else f"nvcutg\n{nvcut['E1g']}\nnvcutu\n{nvcut['E1u']}\n"
+            output += f".noccg\n{nocc['E1g']}\n.noccu\n{nocc['E1u']}\n"
+            output += "" if sum(nvcut.values()) == 0 else f".nvcutg\n{nvcut['E1g']}\n.nvcutu\n{nvcut['E1u']}\n"
         else:
-            output += f"nocc\n{nocc['E1']}\n"
-            output += "" if sum(nvcut.values()) == 0 else f"nvcut\n{nvcut['E1']}\n"
-        output += f"totsym\n{self.table_summary.user_input.totsym_number.get_value()}\n"
-        output += f"diracver\n{self.table_summary.user_input.dirac_ver_number.get_value()}\n"
+            output += f".nocc\n{nocc['E1']}\n"
+            output += "" if sum(nvcut.values()) == 0 else f".nvcut\n{nvcut['E1']}\n"
+        output += f".totsym\n{self.table_summary.user_input.totsym_number.get_value()}\n"
+        output += f".diracver\n{self.table_summary.user_input.dirac_ver_number.get_value()}\n"
         if table_data.header_info.moltra_scheme is not None:
-            output += f"scheme\n{table_data.header_info.moltra_scheme}\n"  # Explicitly set MOLTRA scheme.
-        output += "end\n"
+            output += f".scheme\n{table_data.header_info.moltra_scheme}\n"  # Explicitly set MOLTRA scheme.
+        output += ".subprograms\nIVO\n"
+        output += ".end\n"
 
         # Save standard IVO input (replace active.ivo.inp)
         with open(dir_info.ivo_input_path, "w") as f:
